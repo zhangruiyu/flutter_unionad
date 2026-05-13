@@ -1,27 +1,13 @@
 import {
-  AbilityAware,
-  AbilityPluginBinding,
-  Any,
-  FlutterPlugin,
-  FlutterPluginBinding,
-  MethodCall,
-  MethodCallHandler,
-  MethodChannel,
-  MethodResult,
+  AbilityAware, AbilityPluginBinding, Any, FlutterPlugin, FlutterPluginBinding, MethodCall, MethodCallHandler, MethodChannel, MethodResult,
 } from '@ohos/flutter_ohos';
 import {
-  AdLoadType,
-  AdSlotBuilder,
-  CSJAdSdk,
-  CSJRewardAd,
-  RewardAdInteractionListener,
-  RewardAdLoadListener,
-  SDKConfig,
-  SDKConfigBuilder
+  AdLoadType, AdSlotBuilder, CSJAdSdk, CSJRewardAd, RewardAdInteractionListener, RewardAdLoadListener, SDKConfig, SDKConfigBuilder, MediationConfigBuilder
 } from '@csj/openadsdk';
 import { UIAbility } from '@kit.AbilityKit';
 import FlutterUnionadEventPlugin from './FlutterUnionadEventPlugin';
 import FullScreenVideoAdInteraction from './FullScreenVideoAdInteraction';
+import FlutterUnionadViewPlugin from './FlutterUnionadViewPlugin';
 
 /** FlutterUnionadPlugin **/
 export default class FlutterUnionadPlugin implements FlutterPlugin, MethodCallHandler, AbilityAware {
@@ -30,6 +16,7 @@ export default class FlutterUnionadPlugin implements FlutterPlugin, MethodCallHa
   private uiAbility: UIAbility | null = null;
   private adCreator = CSJAdSdk.getAdCreator();
   private rewardAd: CSJRewardAd | null = null;
+  private flutterPluginBinding: FlutterPluginBinding | null = null;
 
   constructor() {
   }
@@ -39,6 +26,8 @@ export default class FlutterUnionadPlugin implements FlutterPlugin, MethodCallHa
   }
 
   onAttachedToEngine(binding: FlutterPluginBinding): void {
+    console.log("FlutterUnionadPlugin onAttachedToEngine")
+    this.flutterPluginBinding = binding;
     this.channel = new MethodChannel(binding.getBinaryMessenger(), "flutter_unionad");
     this.channel.setMethodCallHandler(this)
     this.applicationContext = binding.getApplicationContext();
@@ -49,10 +38,16 @@ export default class FlutterUnionadPlugin implements FlutterPlugin, MethodCallHa
     if (this.channel != null) {
       this.channel.setMethodCallHandler(null)
     }
+
+    this.flutterPluginBinding = null
   }
 
   onAttachedToAbility(binding: AbilityPluginBinding): void {
+    console.log("FlutterUnionadPlugin onAttachedToAbility")
     this.uiAbility = binding.getAbility()
+    if(this.flutterPluginBinding){
+      FlutterUnionadViewPlugin.register(this.flutterPluginBinding, this.uiAbility)
+    }
   }
 
   onDetachedFromAbility(): void {
@@ -64,6 +59,7 @@ export default class FlutterUnionadPlugin implements FlutterPlugin, MethodCallHa
       let ohosAppId: string = call.args.get("ohosAppId");
       let appName: string = call.args.get("appName");
       let debug: boolean = call.args.get("debug");
+      let useMediation: boolean = call.args.get("useMediation");
       // 创建SDKConfig对象
       let adConfigBuilder = new SDKConfigBuilder()
       let config: SDKConfig = adConfigBuilder
@@ -71,6 +67,12 @@ export default class FlutterUnionadPlugin implements FlutterPlugin, MethodCallHa
         .appName(appName)
         .allowShowNotify(true)
         .debug(debug)
+        // 是否开启聚合功能  true:开启  false:不开启
+        .setMediationConfig(
+          new MediationConfigBuilder()
+            .useMediation(useMediation)
+            .build()
+        )
         .build()
 
       // 初始化SDK

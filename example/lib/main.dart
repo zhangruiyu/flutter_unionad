@@ -1,15 +1,12 @@
-import 'package:flutter/material.dart';
-
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_unionad/flutter_unionad.dart';
 import 'package:flutter_unionad/flutter_unionad.dart';
 import 'package:flutter_unionad_example/banner_page.dart';
 import 'package:flutter_unionad_example/drawfeed_page.dart';
 import 'package:flutter_unionad_example/splash_page.dart';
 
+import 'ad_config.dart';
 import 'native_page.dart';
 
 void main() {
@@ -88,34 +85,27 @@ class _IndexPageState extends State<IndexPage> {
       ),
       // 新模板渲染插屏广告回调
       flutterUnionadNewInteractionCallBack:
-          FlutterUnionadNewInteractionCallBack(
-        onShow: () {
-          print("新模板渲染插屏广告显示");
-        },
-        onSkip: () {
-          print("新模板渲染插屏广告跳过");
-        },
-        onClick: () {
-          print("新模板渲染插屏广告点击");
-        },
-        onFinish: () {
-          print("新模板渲染插屏广告结束");
-        },
-        onFail: (error) {
-          print("新模板渲染插屏广告错误 $error");
-        },
-        onClose: () {
-          print("新模板渲染插屏广告关闭");
-        },
-        onReady: () async {
-          print("新模板渲染插屏广告预加载准备就绪");
-          //显示新模板渲染插屏
-          await FlutterUnionad.showFullScreenVideoAdInteraction();
-        },
-        onUnReady: () {
-          print("新模板渲染插屏广告预加载未准备就绪");
-        },
-      ),
+          FlutterUnionadNewInteractionCallBack(onShow: () {
+        print("新模板渲染插屏广告显示");
+      }, onSkip: () {
+        print("新模板渲染插屏广告跳过");
+      }, onClick: () {
+        print("新模板渲染插屏广告点击");
+      }, onFinish: () {
+        print("新模板渲染插屏广告结束");
+      }, onFail: (error) {
+        print("新模板渲染插屏广告错误 $error");
+      }, onClose: () {
+        print("新模板渲染插屏广告关闭");
+      }, onReady: () async {
+        print("新模板渲染插屏广告预加载准备就绪");
+        //显示新模板渲染插屏
+        await FlutterUnionad.showFullScreenVideoAdInteraction();
+      }, onUnReady: () {
+        print("新模板渲染插屏广告预加载未准备就绪");
+      }, onEcpm: (info) {
+        print("新模板渲染插屏广告ecpm $info");
+      }),
       //激励广告
       flutterUnionadRewardAdCallBack: FlutterUnionadRewardAdCallBack(
           onShow: () {
@@ -143,6 +133,8 @@ class _IndexPageState extends State<IndexPage> {
         print(
             "阶段激励广告奖励  验证结果=$rewardVerify 奖励类型<FlutterUnionadRewardType>=$rewardType 奖励=$rewardAmount"
             "奖励名称$rewardName 错误码=$errorCode 错误$error 建议奖励$propose");
+      }, onEcpm: (info) {
+        print("激励广告ecpm: $info");
       }),
     );
   }
@@ -150,37 +142,37 @@ class _IndexPageState extends State<IndexPage> {
   //注册
   void _initRegister() async {
     _init = await FlutterUnionad.register(
-        //穿山甲广告 Android appid 必填
-        androidAppId: "5098580",
-        //穿山甲广告 ios appid 必填
-        iosAppId: "5098580",
-        ohosAppId: "5638354",
-        //appname 必填
-        appName: "unionad_test",
-        //使用聚合功能一定要打开此开关，否则不会请求聚合广告，默认这个值为false
-        //true使用GroMore下的广告位
-        //false使用广告变现下的广告位
-        useMediation: true,
-        //是否为计费用户 选填
-        paid: false,
-        //用户画像的关键词列表 选填
-        keywords: "",
-        //是否允许sdk展示通知栏提示 选填
-        allowShowNotify: true,
-        //是否显示debug日志
-        debug: true,
-        //是否支持多进程 选填
-        supportMultiProcess: false,
-        //主题模式 默认FlutterUnionAdTheme.DAY,修改后需重新调用初始化
-        themeStatus: _themeStatus,
-        //允许直接下载的网络状态集合 选填
-        directDownloadNetworkType: [
-          FlutterUnionadNetCode.NETWORK_STATE_2G,
-          FlutterUnionadNetCode.NETWORK_STATE_3G,
-          FlutterUnionadNetCode.NETWORK_STATE_4G,
-          FlutterUnionadNetCode.NETWORK_STATE_WIFI
-        ],
-        androidPrivacy: AndroidPrivacy(
+      //穿山甲广告 Android appid 必填
+      androidAppId: AppIdCode.android,
+      //穿山甲广告 ios appid 必填
+      iosAppId: AppIdCode.ios,
+      ohosAppId: AppIdCode.ohos,
+      //appname 必填
+      appName: "unionad_test",
+      //使用聚合功能一定要打开此开关，否则不会请求聚合广告，默认这个值为false
+      //true使用GroMore下的广告位
+      //false使用广告变现下的广告位
+      useMediation: true,
+      //是否为计费用户 选填
+      paid: false,
+      //用户画像的关键词列表 选填
+      keywords: "",
+      //是否允许sdk展示通知栏提示 选填
+      allowShowNotify: true,
+      //是否显示debug日志
+      debug: true,
+      //是否支持多进程 选填
+      supportMultiProcess: false,
+      //主题模式 默认FlutterUnionAdTheme.DAY,修改后需重新调用初始化
+      themeStatus: _themeStatus,
+      //允许直接下载的网络状态集合 选填
+      directDownloadNetworkType: [
+        FlutterUnionadNetCode.NETWORK_STATE_2G,
+        FlutterUnionadNetCode.NETWORK_STATE_3G,
+        FlutterUnionadNetCode.NETWORK_STATE_4G,
+        FlutterUnionadNetCode.NETWORK_STATE_WIFI
+      ],
+      androidPrivacy: AndroidPrivacy(
           //是否允许SDK主动使用地理位置信息 true可以获取，false禁止获取。默认为true
           isCanUseLocation: false,
           //当isCanUseLocation=false时，可传入地理位置信息，穿山甲sdk使用您传入的地理位置信息lat
@@ -211,15 +203,42 @@ class _IndexPageState extends State<IndexPage> {
           isLimitPersonalAds: false,
           // 是否启用程序化广告推荐 true启用 false不启用
           isProgrammaticRecommend: false,
-        ),
-        iosPrivacy: IOSPrivacy(
-          //允许个性化广告
-          limitPersonalAds: false,
-          //允许程序化广告
-          limitProgrammaticAds: false,
-          //允许CAID
-          forbiddenCAID: false,
-        ));
+          userPrivacyConfig: {
+            //控制QQ真g获取频率，"0"表示关闭，“1"或者其他值表示打开。
+            "mcod": "0"
+          }),
+      iosPrivacy: IOSPrivacy(
+        //允许个性化广告
+        limitPersonalAds: false,
+        //允许程序化广告
+        limitProgrammaticAds: false,
+        //允许CAID
+        forbiddenCAID: false,
+      ),
+      //流量分组
+      userInfo: UnionadUserInfo(
+          //设备ID。由开发者定义并传入聚合SDK，后续M支持基于设备ID维度统计数据、或针对个别设备进行测试
+          userId: "unionad_123",
+          //年龄
+          age: 19,
+          //性别 0女 1男 2未知 3不使用
+          gender: 2,
+          //渠道。建议使用以下字符规则：大小写字母数字和下划线[A-Za-z0-9_]
+          channel: "flutter",
+          //子渠道。建议使用以下字符规则：大小写字母数字和下划线[A-Za-z0-9_]
+          subChannel: "flutter_unionad",
+          //分组
+          userValueGroup: "QQ",
+          //自定义参数 Map<String, String>
+          customInfos: {
+            "QQ": "123",
+            "WeChat": "456",
+          }),
+      //配置拉取失败时导入本地配置 https://www.csjplatform.com/supportcenter/5885
+      //android导入/android/app/src/main/assets/下，文件必须为json文件，传入文件名
+      //ios导入/ios/下，文件必须为json文件，传入文件名
+      localConfig: "site_config_5098580",
+    );
     print("sdk初始化 $_init");
     _version = await FlutterUnionad.getSDKVersion();
     _themeStatus = await FlutterUnionad.getThemeStatus();
@@ -342,22 +361,23 @@ class _IndexPageState extends State<IndexPage> {
               child: new Text('激励视频'),
               onPressed: () {
                 FlutterUnionad.loadRewardVideoAd(
-                  //是否个性化 选填
-                  androidCodeId: "102733764",
                   //Android 激励视频广告id  必填
-                  iosCodeId: "102733764",
-                  ohosCodeId: '962519282',
+                  androidCodeId: RewardVideoAdCode.android,
                   //ios 激励视频广告id  必填
-                  rewardName: "200金币",
+                  iosCodeId: RewardVideoAdCode.ios,
+                  ohosCodeId: RewardVideoAdCode.ohos,
                   //奖励名称 选填
-                  rewardAmount: 200,
+                  rewardName: "200金币",
                   //奖励数量 选填
-                  userID: "123",
+                  rewardAmount: 200,
                   //  用户id 选填
-                  orientation: FlutterUnionadOrientation.VERTICAL,
+                  userID: "123",
                   //视屏方向 选填
-                  mediaExtra: null,
+                  orientation: FlutterUnionadOrientation.VERTICAL,
                   //扩展参数 选填
+                  mediaExtra: null,
+                  //是否静音
+                  mutedIfCan: false,
                 );
               },
             ),
@@ -383,10 +403,10 @@ class _IndexPageState extends State<IndexPage> {
               onPressed: () {
                 FlutterUnionad.loadFullScreenVideoAdInteraction(
                   //android 全屏广告id 必填
-                  androidCodeId: "102735530",
+                  androidCodeId: FullScreenVideoAdCode.android,
                   //ios 全屏广告id 必填
-                  iosCodeId: "102735530",
-                  ohosCodeId: "963135369",
+                  iosCodeId: FullScreenVideoAdCode.ios,
+                  ohosCodeId: FullScreenVideoAdCode.ohos,
                   //视屏方向 选填
                   orientation: FlutterUnionadOrientation.VERTICAL,
                 );

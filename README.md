@@ -21,6 +21,7 @@
 ## 官方文档
 * [Android](https://www.csjplatform.com/union/media/union/download/detail?id=147&osType=android&locale=zh-CN&backPath=/union/media/union/download/pangle)
 * [IOS](https://www.csjplatform.com/union/media/union/download/detail?id=148&osType=ios&locale=zh-CN&backPath=/union/media/union/download/pangle)
+* [OpenHarmonyOS]()
 
 ## 版本更新
 
@@ -33,6 +34,14 @@
 ⚠️ 由于融合SDK与旧版部分api不兼容，[2.0.0](https://github.com/gstory0404/flutter_unionad/blob/master/CHANGELOG.md)改动较大,更新后注意查看文档说明
 
 ⚠️ 用gromore来创建广告位，使用gromore id来展示广告
+
+⚠️ 如需需要集成聚合其他广告SDK，需要根据当前插件使用的版本引入对应版本的Adapter库，[离线SDK](https://www.123865.com/s/3tw0Td-HTRkh)，根据官方文档进行配置
+
+⚠️ 鸿蒙开屏、信息流、横幅广告需要使用ohos分支代码
+
+
+<img src="https://raw.githubusercontent.com/gstory0404/flutter_unionad/refs/heads/master/adspic.png" width="30%">
+
 
 ## 本地开发环境
 ```
@@ -63,14 +72,20 @@ import 'package:flutter_unionad/flutter_unionad.dart';
     xmlns:tools="http://schemas.android.com/tools"
     ···>
   <application
+        android:usesCleartextTraffic="true"
         tools:replace="android:label">
 ```
 
 #### 3、IOS
 [SDK](https://www.csjplatform.com/union/media/union/download/log?id=16)已配置插件中，其余根据SDK文档配置，因为使用PlatformView，在Info.plist加入
 ```
- <key>io.flutter.embedded_views_preview</key>
+<key>io.flutter.embedded_views_preview</key>
     <true/>
+<key>NSAppTransportSecurity</key>
+<dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <true/>
+</dict>
 ```
 
 #### 4、鸿蒙next
@@ -146,6 +161,12 @@ await FlutterUnionad.register(
         isLimitPersonalAds: false,
         // 是否启用程序化广告推荐 true启用 false不启用
         isProgrammaticRecommend: false,
+        userPrivacyConfig: {
+            //控制oaid获取频率，"0"表示关闭，“1"或者其他值表示打开。
+            "mcod":"0",
+            //关闭后台监听应用安装、更新、卸载行为
+            "installUninstallListen": "0",
+        }
     ),
     iosPrivacy: IOSPrivacy(
         //允许个性化广告
@@ -154,7 +175,31 @@ await FlutterUnionad.register(
         limitProgrammaticAds: false,
         //允许CAID
         forbiddenCAID: false,
-    )
+    ),
+    //流量分组
+    userInfo: UnionadUserInfo(
+        //设备ID。由开发者定义并传入聚合SDK，后续M支持基于设备ID维度统计数据、或针对个别设备进行测试
+        userId: "unionad_123",
+        //年龄
+        age: 19,
+        //性别 0女 1男 2未知 3不使用
+        gender: 2,
+        //渠道。建议使用以下字符规则：大小写字母数字和下划线[A-Za-z0-9_]
+        channel: "flutter",
+        //子渠道。建议使用以下字符规则：大小写字母数字和下划线[A-Za-z0-9_]
+        subChannel: "flutter_unionad",
+        //分组
+        userValueGroup: "QQ",
+        //自定义参数 Map<String, String>
+        customInfos: {
+            "QQ": "123",
+            "WeChat": "456",
+        }
+    ),
+    //配置拉取失败时导入本地配置 https://www.csjplatform.com/supportcenter/5885
+    //android导入/android/app/src/main/assets/下，文件必须为json文件，传入文件名
+    //ios导入/ios/下，文件必须为json文件，传入文件名
+    localConfig: "site_config_5098580",
 );
 
 ```
@@ -455,6 +500,26 @@ FlutterUnionad.FlutterUnionadStream.initAdStream(
 切换主题模式
 
 修改初始化中themeStatus参数，重新调用初始化
+
+#### 14 ecpm说明
+```
+/// [adnName] ADN的名称，与平台配置一致，自定义ADN时为ADN唯一标识
+/// [customAdnName] 自定义ADN的名称，与平台配置一致，非自定义ADN为nil
+/// [slotID] 代码位
+/// [levelTag] 价格标签，多阶底价下有效
+/// [ecpm] 返回价格，nil为无权限
+/// [biddingType] 广告类型
+/// [errorMsg] 额外错误信息,一般为空(扩展字段)
+/// [requestID] adn提供的真实广告加载ID，可为空
+/// [creativeID] adn提供的真实广告创意ID，可为空
+/// [adRitType] 广告位类型
+/// [segmentId] 流量分组ID
+/// [abtestId] AB实验分组ID
+/// [channel] 渠道名称
+/// [subChannel] 子渠道名称
+/// [scenarioId] 场景ID
+/// [subRitType] 混用类型，banner/fullVideo/rewardVideo/feed/draw/interstitial
+```
 
 ## 常见问题
 

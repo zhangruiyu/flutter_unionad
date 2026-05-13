@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_unionad/drawfeedad/DrawFeedAdView.dart';
 import 'package:flutter_unionad/flutter_unionad.dart';
 
+import 'ad_config.dart';
+
 /// 描述：draw视频广告
 /// @author guozi
 /// @e-mail gstory0404@gmail.com
@@ -28,12 +30,16 @@ class _DrawFeedPageState extends State<DrawFeedPage> {
           (context, index) {
             if (index == 0) {
               return FlutterUnionadDrawFeedAdView(
-                androidCodeId: "102734241",
-                iosCodeId: "102734241",
+                // Android draw视屏广告id 必填
+                androidCodeId: DrawFeedAdCode.android,
+                //ios draw视屏广告id 必填
+                iosCodeId: DrawFeedAdCode.ios,
                 //是否支持 DeepLink 选填
-                width: 600.5,
+                width: MediaQuery.of(context).size.width,
                 // 期望view 宽度 dp 必填
                 height: 800.5,
+                //是否静音
+                isMuted: false,
                 callBack: FlutterUnionadDrawFeedCallBack(
                   onShow: () {
                     print("draw广告显示");
@@ -56,15 +62,18 @@ class _DrawFeedPageState extends State<DrawFeedPage> {
                   onVideoStop: () {
                     print("draw视频结束");
                   },
+                  onEcpm: (info) {
+                    print("draw视频ecpm $info");
+                  },
                 ),
               );
             }
             return Center(
               child: FlutterUnionad.drawFeedAdView(
-                androidCodeId: "102734241",
                 // Android draw视屏广告id 必填
-                iosCodeId: "102734241",
+                androidCodeId: DrawFeedAdCode.android,
                 //ios draw视屏广告id 必填
+                iosCodeId: DrawFeedAdCode.ios,
                 supportDeepLink: true,
                 //是否支持 DeepLink 选填
                 expressViewWidth: 600.5,

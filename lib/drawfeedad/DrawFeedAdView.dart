@@ -2,13 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_unionad/flutter_unionad.dart';
-import 'package:flutter_unionad/flutter_unionad_code.dart';
 
 class FlutterUnionadDrawFeedAdView extends StatefulWidget {
   final String androidCodeId;
   final String iosCodeId;
   final double width;
   final double height;
+  final bool isMuted;
   final FlutterUnionadDrawFeedCallBack? callBack;
 
   const FlutterUnionadDrawFeedAdView(
@@ -17,6 +17,7 @@ class FlutterUnionadDrawFeedAdView extends StatefulWidget {
       required this.iosCodeId,
       required this.width,
       required this.height,
+      this.isMuted = true,
       this.callBack})
       : super(key: key);
 
@@ -59,6 +60,7 @@ class _DrawFeedAdViewState extends State<FlutterUnionadDrawFeedAdView> {
             "androidCodeId": widget.androidCodeId,
             "width": widget.width,
             "height": widget.height,
+            "isMuted": widget.isMuted,
           },
           onPlatformViewCreated: _registerChannel,
           creationParamsCodec: const StandardMessageCodec(),
@@ -74,6 +76,7 @@ class _DrawFeedAdViewState extends State<FlutterUnionadDrawFeedAdView> {
             "iosCodeId": widget.iosCodeId,
             "width": widget.width,
             "height": widget.height,
+            "isMuted": widget.isMuted,
           },
           onPlatformViewCreated: _registerChannel,
           creationParamsCodec: const StandardMessageCodec(),
@@ -92,6 +95,7 @@ class _DrawFeedAdViewState extends State<FlutterUnionadDrawFeedAdView> {
 
   //监听原生view传值
   Future<dynamic> _platformCallHandler(MethodCall call) async {
+    // debugPrint("DrawFeed广告: ${call.method}  ${call.arguments}");
     switch (call.method) {
       //显示广告
       case FlutterUnionadMethod.onShow:
@@ -99,34 +103,35 @@ class _DrawFeedAdViewState extends State<FlutterUnionadDrawFeedAdView> {
         if (mounted) {
           setState(() {
             _isShowAd = true;
-            _width = (map["width"]).toDouble();
-            _height = (map["height"]).toDouble();
+            if (map["width"] > 0) {
+              _width = (map["width"]).toDouble();
+              _height = (map["height"]).toDouble();
+            }
           });
         }
-        if (widget.callBack != null) {
-          widget.callBack?.onShow!();
-        }
+        widget.callBack?.onShow?.call();
         break;
       //广告加载失败
       case FlutterUnionadMethod.onFail:
-        if (widget.callBack != null) {
-          widget.callBack?.onFail!(call.arguments);
-        }
+        widget.callBack?.onFail?.call(call.arguments);
         setState(() {
           _isShowAd = false;
         });
         break;
       case FlutterUnionadMethod.onClick:
-        widget.callBack?.onClick!();
+        widget.callBack?.onClick?.call();
         break;
       case FlutterUnionadMethod.onVideoPlay:
-        widget.callBack?.onVideoPlay!();
+        widget.callBack?.onVideoPlay?.call();
         break;
       case FlutterUnionadMethod.onVideoPause:
-        widget.callBack?.onVideoPause!();
+        widget.callBack?.onVideoPause?.call();
         break;
       case FlutterUnionadMethod.onVideoStop:
-        widget.callBack?.onVideoStop!();
+        widget.callBack?.onVideoStop?.call();
+        break;
+      case FlutterUnionadMethod.onEcpm:
+        widget.callBack?.onEcpm?.call(call.arguments.cast<String, dynamic>());
         break;
     }
   }

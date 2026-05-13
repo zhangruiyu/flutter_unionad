@@ -9,6 +9,7 @@ class FlutterUnionadNativeAdView extends StatefulWidget {
   bool? supportDeepLink;
   double width;
   double height;
+  final bool isMuted;
   FlutterUnionadNativeCallBack? callBack;
 
   /// # 信息流广告
@@ -23,6 +24,7 @@ class FlutterUnionadNativeAdView extends StatefulWidget {
   ///
   /// [height] 期望view高度 dp 必填
   ///
+  /// [isMuted] 是否静音
   ///
   /// [FlutterUnionAdNativeCallBack] 信息流广告回调
   ///
@@ -33,6 +35,7 @@ class FlutterUnionadNativeAdView extends StatefulWidget {
       required this.supportDeepLink,
       required this.width,
       required this.height,
+      this.isMuted = true,
       this.callBack})
       : super(key: key);
 
@@ -79,6 +82,7 @@ class _NativeAdViewState extends State<FlutterUnionadNativeAdView> {
             "supportDeepLink": widget.supportDeepLink,
             "width": widget.width,
             "height": widget.height,
+            "isMuted": widget.isMuted,
           },
           onPlatformViewCreated: _registerChannel,
           creationParamsCodec: const StandardMessageCodec(),
@@ -95,6 +99,7 @@ class _NativeAdViewState extends State<FlutterUnionadNativeAdView> {
             "supportDeepLink": widget.supportDeepLink,
             "width": widget.width,
             "height": widget.height,
+            "isMuted": widget.isMuted,
           },
           onPlatformViewCreated: _registerChannel,
           creationParamsCodec: const StandardMessageCodec(),
@@ -113,6 +118,7 @@ class _NativeAdViewState extends State<FlutterUnionadNativeAdView> {
 
   //监听原生view传值
   Future<dynamic> _platformCallHandler(MethodCall call) async {
+    // debugPrint("信息流广告: ${call.method}  ${call.arguments}");
     switch (call.method) {
       //显示广告
       case FlutterUnionadMethod.onShow:
@@ -120,11 +126,13 @@ class _NativeAdViewState extends State<FlutterUnionadNativeAdView> {
         if (mounted) {
           setState(() {
             _isShowAd = true;
-            _width = (map["width"]).toDouble();
-            _height = (map["height"]).toDouble();
+            if (map["width"] > 0) {
+              _width = (map["width"]).toDouble();
+              _height = (map["height"]).toDouble();
+            }
           });
         }
-        widget.callBack?.onShow!();
+        widget.callBack?.onShow?.call();
         break;
       //广告加载失败
       case FlutterUnionadMethod.onFail:
@@ -133,7 +141,7 @@ class _NativeAdViewState extends State<FlutterUnionadNativeAdView> {
             _isShowAd = false;
           });
         }
-        widget.callBack?.onFail!(call.arguments);
+        widget.callBack?.onFail?.call(call.arguments);
         break;
       //广告不感兴趣
       case FlutterUnionadMethod.onDislike:
@@ -142,11 +150,15 @@ class _NativeAdViewState extends State<FlutterUnionadNativeAdView> {
             _isShowAd = false;
           });
         }
-        widget.callBack?.onDislike!(call.arguments);
+        widget.callBack?.onDislike?.call(call.arguments);
         break;
       //点击
       case FlutterUnionadMethod.onClick:
-        widget.callBack?.onClick!();
+        widget.callBack?.onClick?.call();
+        break;
+      //ecpm
+      case FlutterUnionadMethod.onEcpm:
+        widget.callBack?.onEcpm?.call(call.arguments.cast<String, dynamic>());
         break;
     }
   }

@@ -63,11 +63,6 @@ class MyBannerView : ADContainerView{
         bannerAdView.loadAdData()
     }
     
-    private func queryEcpm(){
-//        let info = bannerAdView
-    }
-    
-    
     private func disposeView() {
         removeFromSuperview()
     }
@@ -92,7 +87,11 @@ extension MyBannerView: BUNativeExpressBannerViewDelegate {
 
     public func nativeExpressBannerAdView(_ bannerAdView: BUNativeExpressBannerView, dislikeWithReason filterwords: [BUDislikeWords]?) {
         LogUtil.logInstance.printLog(message:"点击了不感兴趣")
-        self.channel?.invokeMethod("onDislike", arguments: filterwords?[0].name)
+        if(filterwords != nil && !filterwords!.isEmpty){
+            self.channel?.invokeMethod("onDislike", arguments: filterwords?[0].name)
+        }else{
+            self.channel?.invokeMethod("onDislike", arguments: "")
+        }
         self.disposeView()
     }
     
@@ -101,6 +100,9 @@ extension MyBannerView: BUNativeExpressBannerViewDelegate {
         let map : NSDictionary = ["width":bannerAdView.frame.size.width,
                                   "height":bannerAdView.frame.size.height]
         self.channel?.invokeMethod("onShow", arguments: map)
+        let ecpmInfo : BUMRitInfo? = bannerAdView.mediation?.getShowEcpmInfo();
+        LogUtil.logInstance.printLog(message:"ecpm获取成功：\(ecpmInfo?.toDictionary())");
+        self.channel?.invokeMethod("onEcpm", arguments: ecpmInfo?.toDictionary())
     }
     
     public func nativeExpressBannerAdViewDidClick(_ bannerAdView: BUNativeExpressBannerView) {

@@ -1,16 +1,20 @@
 package com.gstory.flutter_unionad.rewardvideoad
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import com.bytedance.sdk.openadsdk.*
+import com.bytedance.sdk.openadsdk.AdSlot
+import com.bytedance.sdk.openadsdk.TTAdConstant
 import com.bytedance.sdk.openadsdk.TTAdNative.RewardVideoAdListener
+import com.bytedance.sdk.openadsdk.TTAdSdk
+import com.bytedance.sdk.openadsdk.TTRewardVideoAd
 import com.bytedance.sdk.openadsdk.TTRewardVideoAd.RewardAdInteractionListener
 import com.bytedance.sdk.openadsdk.mediation.MediationConstant
 import com.bytedance.sdk.openadsdk.mediation.ad.MediationAdSlot
+import com.gstory.flutter_unionad.EcpmUtil
 import com.gstory.flutter_unionad.FlutterUnionadEventPlugin
-import java.util.*
 
 
 /**
@@ -18,6 +22,7 @@ import java.util.*
  * @Author: gstory0404@gmail
  * @CreateDate: 2020/8/20 18:46
  */
+@SuppressLint("StaticFieldLeak")
 object RewardVideoAd {
     private val TAG = "RewardVideoAd"
 
@@ -34,6 +39,7 @@ object RewardVideoAd {
     private var userID: String? = null
     private var orientation: Int? = TTAdConstant.VERTICAL
     private var mediaExtra: String? = null
+    private var mutedIfCan: Boolean = true
 
     fun init(context: Context, mActivity: Activity, params: Map<String?, Any?>) {
         this.mContext = context
@@ -42,6 +48,7 @@ object RewardVideoAd {
         this.rewardName = params["rewardName"] as String
         this.rewardAmount = params["rewardAmount"] as Int
         this.userID = params["userID"] as String
+        this.mutedIfCan = params["mutedIfCan"] as Boolean
         if (params["orientation"] == null) {
             orientation = 0
         } else {
@@ -73,6 +80,7 @@ object RewardVideoAd {
                     .setExtraObject(MediationConstant.ADN_ADMOB, mediaExtra)
                     .setExtraObject(MediationConstant.ADN_SIGMOB, mediaExtra)
                     .setExtraObject(MediationConstant.ADN_UNITY, mediaExtra)
+                    .setMuted(mutedIfCan)
                     .build()
             )
             .setMediaExtra(mediaExtra) //用户透传的信息，可不传
@@ -112,7 +120,6 @@ object RewardVideoAd {
                         "onAdMethod" to "onReady"
                     )
                 )
-                queryEcpm()
             }
         })
     }
@@ -122,9 +129,17 @@ object RewardVideoAd {
             RewardAdInteractionListener {
             override fun onAdShow() {
                 Log.e(TAG, "rewardVideoAd show")
-                var map: MutableMap<String, Any?> =
+                FlutterUnionadEventPlugin.sendContent(
                     mutableMapOf("adType" to "rewardAd", "onAdMethod" to "onShow")
-                FlutterUnionadEventPlugin.sendContent(map)
+                )
+                Log.d(TAG,"ecpm ${EcpmUtil.toMap(mttRewardVideoAd?.mediationManager?.showEcpm)}")
+                FlutterUnionadEventPlugin.sendContent(
+                    mutableMapOf(
+                        "adType" to "rewardAd",
+                        "onAdMethod" to "onEcpm",
+                        "info" to EcpmUtil.toMap(mttRewardVideoAd?.mediationManager?.showEcpm)
+                    )
+                )
             }
 
             override fun onAdVideoBarClick() {
@@ -206,7 +221,7 @@ object RewardVideoAd {
                     "onAdMethod" to "onRewardArrived",
                     "rewardVerify" to isRewardValid,
                     "rewardType" to rewardType,
-                    "rewardAmount" to if(extraInfo["reward_extra_key_reward_amount"] is Integer) extraInfo["reward_extra_key_reward_amount"] else (extraInfo["reward_extra_key_reward_amount"] as Float).toInt(),
+                    "rewardAmount" to if (extraInfo["reward_extra_key_reward_amount"] is Integer) extraInfo["reward_extra_key_reward_amount"] else (extraInfo["reward_extra_key_reward_amount"] as Float).toInt(),
                     "rewardName" to extraInfo["reward_extra_key_reward_name"],
                     "propose" to extraInfo["reward_extra_key_reward_propose"],
                     "errorCode" to extraInfo["reward_extra_key_error_code"],
@@ -244,7 +259,6 @@ object RewardVideoAd {
             TTAdConstant.RitScenes.CUSTOMIZE_SCENES,
             "scenes_test"
         )
-        mttRewardVideoAd = null
     }
 
     private fun getAdType(type: Int): String? {
@@ -254,32 +268,5 @@ object RewardVideoAd {
             TTAdConstant.AD_TYPE_PLAYABLE -> return "纯Playable，type=$type"
         }
         return "未知类型+type=$type"
-    }
-
-    /**
-     * 获取ecpm
-     */
-    private fun queryEcpm() {
-        var ecpmInfo = mttRewardVideoAd?.mediationManager?.showEcpm
-        if (ecpmInfo != null) {
-            Log.d(
-                TAG, "广告 ecpm: \n" +
-                        "SdkName: " + ecpmInfo.sdkName + ",\n" +
-                        "CustomSdkName: " + ecpmInfo.customSdkName + ",\n" +
-                        "SlotId: " + ecpmInfo.slotId + ",\n" +
-                        // 单位：分
-                        "Ecpm: " + ecpmInfo.ecpm + ",\n" +
-                        "ReqBiddingType: " + ecpmInfo.reqBiddingType + ",\n" +
-                        "ErrorMsg: " + ecpmInfo.errorMsg + ",\n" +
-                        "RequestId: " + ecpmInfo.requestId + ",\n" +
-                        "RitType: " + ecpmInfo.ritType + ",\n" +
-                        "AbTestId: " + ecpmInfo.abTestId + ",\n" +
-                        "ScenarioId: " + ecpmInfo.scenarioId + ",\n" +
-                        "SegmentId: " + ecpmInfo.segmentId + ",\n" +
-                        "Channel: " + ecpmInfo.channel + ",\n" +
-                        "SubChannel: " + ecpmInfo.subChannel + ",\n" +
-                        "customData: " + ecpmInfo.customData
-            )
-        }
     }
 }

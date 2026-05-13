@@ -1,3 +1,90 @@
+## 2.2.7
+* android sdk升级7.5.1.0
+* ios sdk升级7.5.0.4
+* 兼容 UIScene 生命周期，修复激励广告展示与回调时序问题，感谢[zeewell](https://github.com/zeewell)的[提交](https://github.com/gstory0404/flutter_unionad/pull/195)
+* 插件发布2.2.7
+
+## 2.2.6
+* android sdk升级7.4.2.0
+* ios sdk升级7.5.0.2
+
+## 2.2.5
+* 修复Android信息流部分渠道广告高度获取失败
+
+## 2.2.4
+* android sdk升级7.4.0.7
+* ios sdk升级7.4.0.1
+
+## 2.2.3
+* android sdk升级7.3.0.7
+* ios sdk升级7.3.0.4
+* 支持流量分组
+
+## 2.2.2
+* android sdk升级7.2.0.9
+* ios sdk升级7.2.0.6
+
+## 2.2.1
+* android sdk升级7.1.3.2
+* ios sdk升级7.2.0.0
+
+## 2.2.0
+* android sdk升级7.1.0.5
+* ios sdk升级7.1.0.3
+
+## 2.1.12
+* android sdk升级7.0.1.2
+* ios sdk升级7.0.0.3
+* ecpm获取优化
+
+## 2.1.11
+* 初始化新增导入本地配置
+
+## 2.1.10
+* android sdk升级6.9.1.5
+* 新增android oaid获取次数限制开关
+
+## 2.1.9
+* android sdk升级6.8.4.0
+* ios sdk升级6.9.0.7
+* 优化iOS激励广告监听
+
+## 2.1.8
+* ios sdk升级6.9.0.3
+
+## 2.1.7
+* android sdk升级6.8.1.7
+* ios sdk升级6.9.0.1
+
+## 2.1.6
+* ios sdk升级6.8.0.2
+
+## 2.1.5
+* 开屏广告新增isShake摇一摇开关
+
+## 2.1.4
+* ios sdk升级6.7.0.3
+* 所有广告新增ecpm回调
+* 信息流、Draw广告新增静音开关
+* 广告View只有原生返回宽大于0时才做自适应处理
+
+## 2.1.2
+* ios sdk升级6.7.0.2
+* 修复flutter 3.29.0中安卓移除Registrar
+
+## 2.1.2
+* ios sdk升级6.7.0.1
+* ohos sdk升级6.7.0,增加插屏广告,感谢@[zhangruiyu](https://github.com/zhangruiyu)的[pr](https://github.com/gstory0404/flutter_unionad/pull/149)
+
+## 2.1.1
+* ios sdk升级6.7.0.0
+* 修复iOS onDislike回调数组可能为空导致的奔溃异常
+
+## 2.1.0
+* android sdk升级6.6.0.7
+* ios sdk升级6.6.0.5
+* 新增OpenHarmonyOS支持，感谢@[zhangruiyu](https://github.com/zhangruiyu)的[pr](https://github.com/gstory0404/flutter_unionad/pull/142)，目前仅支持激励视频广告
+
 ## 2.0.13
 * android高版本兼容
 

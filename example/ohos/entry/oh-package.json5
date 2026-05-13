@@ -6,6 +6,7 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "flutter_unionad": "file:../har/flutter_unionad.har"
+    "flutter_unionad": "file:../har/flutter_unionad.har",
+    "@ohos/flutter_ohos": "har/flutter.har"
   }
 }

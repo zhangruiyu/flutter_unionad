@@ -9,7 +9,7 @@ import Foundation
 import BUAdSDK
 import Flutter
 
-public class NativeAdView : NSObject,FlutterPlatformView{
+public class NativeAdView : NSObject,FlutterPlatformView, BUCustomEventProtocol{
     private let container : ADContainerView
     private var nativeExpressAdManager : BUNativeExpressAdManager
     private var channel : FlutterMethodChannel?
@@ -18,6 +18,7 @@ public class NativeAdView : NSObject,FlutterPlatformView{
     let mCodeId :String?
     var viewWidth : Float?
     var viewHeight :Float?
+    var isMuted :Bool?
 
     
     init(_ frame : CGRect,binaryMessenger: FlutterBinaryMessenger , id : Int64, params :Any?) {
@@ -27,6 +28,7 @@ public class NativeAdView : NSObject,FlutterPlatformView{
         self.mCodeId = dict.value(forKey: "iosCodeId") as? String
         self.viewWidth = Float(dict.value(forKey: "width") as! Double)
         self.viewHeight = Float(dict.value(forKey: "height") as! Double)
+        self.isMuted = dict.value(forKey: "isMuted") as! Bool
         self.nativeExpressAdManager = BUNativeExpressAdManager()
         super.init()
         self.channel = FlutterMethodChannel.init(name: FlutterUnionadConfig.view.nativeAdView + "_" + String(id), binaryMessenger: binaryMessenger)
@@ -44,6 +46,7 @@ public class NativeAdView : NSObject,FlutterPlatformView{
         buSlot.id = self.mCodeId!
         buSlot.adType = BUAdSlotAdType.feed
         buSlot.position = BUAdSlotPosition.feed
+        buSlot.mediation.mutedIfCan = self.isMuted!; // 静音 聚合功能
         let bUSize = BUSize.init()
         bUSize.width = Int(width)
         bUSize.height = Int(heigh)
@@ -93,7 +96,11 @@ extension NativeAdView : BUNativeExpressAdViewDelegate{
     public func nativeExpressAdView(_ nativeExpressAdView: BUNativeExpressAdView, dislikeWithReason filterWords: [BUDislikeWords]) {
         self.disposeView()
         LogUtil.logInstance.printLog(message: "nativeExpressAdView")
-        self.channel?.invokeMethod("onDislike", arguments: filterWords[0].name)
+        if(!filterWords.isEmpty){
+            self.channel?.invokeMethod("onDislike", arguments: filterWords[0].name)
+        }else{
+            self.channel?.invokeMethod("onDislike", arguments: "")
+        }
     }
     
     public func nativeExpressAdView(_ nativeExpressAdView: BUNativeExpressAdView, stateDidChanged playerState: BUPlayerPlayState) {
@@ -102,6 +109,9 @@ extension NativeAdView : BUNativeExpressAdViewDelegate{
     
     public func nativeExpressAdViewWillShow(_ nativeExpressAdView: BUNativeExpressAdView) {
         LogUtil.logInstance.printLog(message: "nativeExpressAdViewWillShow")
+        let ecpmInfo : BUMRitInfo? = nativeExpressAdView.mediation?.getShowEcpmInfo();
+        LogUtil.logInstance.printLog(message:"ecpm获取成功：\(ecpmInfo?.toDictionary())");
+        self.channel?.invokeMethod("onEcpm", arguments: ecpmInfo?.toDictionary())
     }
     
     public func nativeExpressAdViewDidClick(_ nativeExpressAdView: BUNativeExpressAdView) {

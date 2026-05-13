@@ -1,8 +1,3 @@
-export 'package:flutter_unionad/flutter_unionad_code.dart';
-export 'package:flutter_unionad/flutter_unionad_stream.dart';
-
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,12 +6,15 @@ import 'bannerad/BannerAdView.dart';
 import 'drawfeedad/DrawFeedAdView.dart';
 import 'flutter_unionad_code.dart';
 import 'nativead/NativeAdView.dart';
+
+export 'package:flutter_unionad/flutter_unionad_code.dart';
+export 'package:flutter_unionad/flutter_unionad_stream.dart';
+
 // import 'splashad/SplashAdView.dart';
 
 part 'package:flutter_unionad/flutter_unionad_callback.dart';
-
 part 'package:flutter_unionad/flutter_unionad_privacy.dart';
-
+part 'package:flutter_unionad/flutter_unionad_user_info.dart';
 part 'package:flutter_unionad/splashad/SplashAdView.dart';
 
 /// 描述：字节跳动 穿山甲广告flutter版
@@ -56,6 +54,10 @@ class FlutterUnionad {
   /// [androidPrivacy] Android隐私信息控制配置
   ///
   /// [iosPrivacy] ios隐私信息控制配置
+  ///
+  /// [localConfig] 配置拉取失败时导入本地配置 https://www.csjplatform.com/supportcenter/5885
+  /// android导入/android/app/src/main/assets/下，文件必须为json文件，传入文件名
+  /// ios导入/ios/下，文件必须为json文件，传入文件名
   static Future<bool> register({
     required String iosAppId,
     required String androidAppId,
@@ -72,6 +74,8 @@ class FlutterUnionad {
     List<int>? directDownloadNetworkType,
     AndroidPrivacy? androidPrivacy,
     IOSPrivacy? iosPrivacy,
+    UnionadUserInfo? userInfo,
+    String? localConfig,
   }) async {
     return await _channel.invokeMethod("register", {
       "iosAppId": iosAppId,
@@ -98,7 +102,10 @@ class FlutterUnionad {
           ? AndroidPrivacy().toMap()
           : androidPrivacy.toMap(),
       "iosPrivacy":
-          iosPrivacy == null ? IOSPrivacy().toMap() : iosPrivacy.toMap()
+          iosPrivacy == null ? IOSPrivacy().toMap() : iosPrivacy.toMap(),
+      "userInfo":
+          userInfo == null ? UnionadUserInfo().toMap() : userInfo.toMap(),
+      "localConfig": localConfig ?? "",
     });
   }
 
@@ -269,9 +276,19 @@ class FlutterUnionad {
   ///
   /// [iosCodeId] ios 激励视频广告id 必填
   ///
-  /// [supportDeepLink] 是否支持 DeepLink 选填
+  /// [ohosCodeId] 鸿蒙 激励视频广告id 必填
   ///
-  /// [adLoadType]用于标注此次的广告请求用途为预加载（当做缓存）还是实时加载，[FlutterUnionadLoadType]
+  /// [rewardName] 奖励名称 必填
+  ///
+  /// [rewardAmount] 奖励数量 必填
+  ///
+  /// [userID] 用户id 必填
+  ///
+  /// [orientation] 屏幕方向 0竖屏 1横屏
+  ///
+  /// [mediaExtra] 透传扩展字段
+  ///
+  /// [mutedIfCan] 是否静音
   ///
   static Future<bool> loadRewardVideoAd({
     required String androidCodeId,
@@ -282,6 +299,7 @@ class FlutterUnionad {
     required String userID,
     int? orientation,
     String? mediaExtra,
+    bool? mutedIfCan,
   }) async {
     return await _channel.invokeMethod("loadRewardVideoAd", {
       "androidCodeId": androidCodeId,
@@ -292,6 +310,7 @@ class FlutterUnionad {
       "userID": userID,
       "orientation": orientation ?? 0,
       "mediaExtra": mediaExtra ?? "",
+      "mutedIfCan": mutedIfCan ?? true,
     });
   }
 

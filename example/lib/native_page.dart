@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_unionad/flutter_unionad.dart';
 import 'package:flutter_unionad/nativead/NativeAdView.dart';
 
+import 'ad_config.dart';
+
 /// 描述：个性化模板信息流广告
 /// @author guozi
 /// @e-mail gstory0404@gmail.com
@@ -30,15 +32,17 @@ class _NativeExpressAdPageState extends State<NativeAdPage> {
             //个性化模板信息流广告
             FlutterUnionadNativeAdView(
               //android 信息流广告id 必填
-              androidCodeId: "102730271",
+              androidCodeId: NativeAdCode.android,
               //ios banner广告id 必填
-              iosCodeId: "102730271",
+              iosCodeId: NativeAdCode.ios,
               //是否支持 DeepLink 选填
               supportDeepLink: true,
               // 期望view 宽度 dp 必填
               width: 375.5,
               //期望view高度 dp 必填
-              height: 0,
+              height: 100,
+              //是否静音
+              isMuted: false,
               callBack: FlutterUnionadNativeCallBack(
                 onShow: () {
                   print("信息流广告显示");
@@ -52,13 +56,16 @@ class _NativeExpressAdPageState extends State<NativeAdPage> {
                 onClick: () {
                   print("信息流广告点击");
                 },
+                onEcpm: (info) {
+                  print("信息流广告ecpm $info");
+                },
               ),
             ),
             FlutterUnionad.nativeAdView(
               //android 信息流广告id 必填
-              androidCodeId: "102730271",
+              androidCodeId: NativeAdCode.android,
               //ios banner广告id 必填
-              iosCodeId: "102730271",
+              iosCodeId: NativeAdCode.ios,
               expressViewWidth: 300,
               expressViewHeight: 200,
               callBack: FlutterUnionadNativeCallBack(

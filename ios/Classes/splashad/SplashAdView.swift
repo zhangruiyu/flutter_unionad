@@ -18,6 +18,7 @@ public class SplashAdView : NSObject,FlutterPlatformView{
     var viewWidth : Float?
     var viewHeight :Float?
     var hideSkip :Bool = false
+    var isShake :Bool = false
     var timeout : Double? = 3.0
     var splashAd:BUSplashAd?
     
@@ -28,6 +29,7 @@ public class SplashAdView : NSObject,FlutterPlatformView{
         let dict = params as! NSDictionary
         self.mCodeId = dict.value(forKey: "iosCodeId") as? String
         self.hideSkip = dict.value(forKey: "hideSkip") as! Bool
+        self.isShake = dict.value(forKey: "isShake") as! Bool
         self.viewWidth = Float(dict.value(forKey: "width") as! Double)
         self.viewHeight = Float(dict.value(forKey: "height") as! Double)
         self.timeout = (dict.value(forKey: "timeout") as! Double) / 1000
@@ -83,6 +85,13 @@ public class SplashAdView : NSObject,FlutterPlatformView{
         self.channel?.invokeMethod("onSkip", arguments: "开屏广告跳过")
         self.disposeView()
      }
+    
+    //获取ecpm
+    func queryECPM(){
+        let ecpmInfo : BUMRitInfo? = self.splashAd?.mediation?.getShowEcpmInfo();
+        LogUtil.logInstance.printLog(message:"ecpm获取成功：\(ecpmInfo?.toDictionary())");
+        self.channel?.invokeMethod("onEcpm", arguments: ecpmInfo?.toDictionary())
+    }
 }
 
 extension SplashAdView : BUSplashAdDelegate{
@@ -107,7 +116,6 @@ extension SplashAdView : BUSplashAdDelegate{
             self.showSkipButton()
         }
         self.splashAd?.showSplashView(inRootViewController: MyUtils.getVC().navigationController ?? MyUtils.getVC())
-        self.channel?.invokeMethod("onShow", arguments: "开屏广告加载完成")
     }
     
     //SDK渲染开屏广告渲染失败回调
@@ -125,6 +133,8 @@ extension SplashAdView : BUSplashAdDelegate{
     
     public func splashAdDidShow(_ splashAd: BUSplashAd) {
         LogUtil.logInstance.printLog(message: "开屏广告展示")
+        self.channel?.invokeMethod("onShow", arguments: "开屏广告展示")
+        self.queryECPM()
     }
     
     public func splashAdDidClose(_ splashAd: BUSplashAd, closeType: BUSplashAdCloseType) {

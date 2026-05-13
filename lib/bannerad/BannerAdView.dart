@@ -6,6 +6,7 @@ import 'package:flutter_unionad/flutter_unionad.dart';
 class FlutterUnionadBannerView extends StatefulWidget {
   final String androidCodeId;
   final String iosCodeId;
+  final String? ohosId;
   final double width;
   final double height;
   final FlutterUnionadBannerCallBack? callBack;
@@ -26,6 +27,7 @@ class FlutterUnionadBannerView extends StatefulWidget {
       {Key? key,
       required this.androidCodeId,
       required this.iosCodeId,
+      this.ohosId,
       required this.width,
       required this.height,
       this.callBack})
@@ -90,6 +92,21 @@ class _BannerAdViewState extends State<FlutterUnionadBannerView> {
           creationParamsCodec: const StandardMessageCodec(),
         ),
       );
+    } else if (defaultTargetPlatform == TargetPlatform.ohos) {
+      return Container(
+        width: _width,
+        height: _height,
+        child: OhosView(
+          viewType: _viewType,
+          creationParams: {
+            "ohosId": widget.ohosId,
+            "width": widget.width,
+            "height": widget.height,
+          },
+          onPlatformViewCreated: _registerChannel,
+          creationParamsCodec: const StandardMessageCodec(),
+        ),
+      );
     } else {
       return Container();
     }
@@ -103,19 +120,21 @@ class _BannerAdViewState extends State<FlutterUnionadBannerView> {
 
   //监听原生view传值
   Future<dynamic> _platformCallHandler(MethodCall call) async {
+    //debugPrint("监听原生view传值=>${call.method}  ${call.arguments} ${_channel?.name}");
     switch (call.method) {
       //显示广告
       case FlutterUnionadMethod.onShow:
         Map map = call.arguments;
-        print(map);
         if (mounted) {
           setState(() {
             _isShowAd = true;
-            _width = (map["width"]).toDouble();
-            _height = (map["height"]).toDouble();
+            if (map["width"] > 0) {
+              _width = (map["width"]).toDouble();
+              _height = (map["height"]).toDouble();
+            }
           });
         }
-        widget.callBack?.onShow!();
+        widget.callBack?.onShow?.call();
         break;
       //广告加载失败
       case FlutterUnionadMethod.onFail:
@@ -124,7 +143,7 @@ class _BannerAdViewState extends State<FlutterUnionadBannerView> {
             _isShowAd = false;
           });
         }
-        widget.callBack?.onFail!(call.arguments);
+        widget.callBack?.onFail?.call(call.arguments);
         break;
       //广告不感兴趣
       case FlutterUnionadMethod.onDislike:
@@ -133,12 +152,14 @@ class _BannerAdViewState extends State<FlutterUnionadBannerView> {
             _isShowAd = false;
           });
         }
-        if (widget.callBack != null) {
-          widget.callBack?.onDislike!(call.arguments);
-        }
+        widget.callBack?.onDislike?.call(call.arguments);
         break;
       case FlutterUnionadMethod.onClick:
-        widget.callBack?.onClick!();
+        widget.callBack?.onClick?.call();
+        break;
+      //开屏广告ecpm
+      case FlutterUnionadMethod.onEcpm:
+        widget.callBack?.onEcpm?.call(call.arguments.cast<String, dynamic>());
         break;
     }
   }

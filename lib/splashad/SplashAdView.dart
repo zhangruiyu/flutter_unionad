@@ -8,11 +8,13 @@ part of 'package:flutter_unionad/flutter_unionad.dart';
 class FlutterUnionadSplashAdView extends StatefulWidget {
   String androidCodeId;
   String iosCodeId;
+  String? ohosId;
   bool? supportDeepLink;
   double? width;
   double? height;
   int? timeout;
   bool? hideSkip;
+  bool? isShake;
   FlutterUnionadSplashCallBack? callBack;
 
   /// # 开屏广告
@@ -33,19 +35,23 @@ class FlutterUnionadSplashAdView extends StatefulWidget {
   ///
   /// [hideSkip] 是否影藏跳过按钮(当影藏的时候显示自定义跳过按钮) 默认显示
   ///
+  /// [isShake] 开屏摇一摇开关
+  ///
   /// [callBack] 广告回调[FlutterUnionadSplashCallBack]
   ///
-  FlutterUnionadSplashAdView(
-      {Key? key,
-      required this.androidCodeId,
-      required this.iosCodeId,
-      this.supportDeepLink,
-      this.width,
-      this.height,
-      this.timeout,
-      this.hideSkip,
-      this.callBack})
-      : super(key: key);
+  FlutterUnionadSplashAdView({
+    Key? key,
+    required this.androidCodeId,
+    required this.iosCodeId,
+    this.ohosId,
+    this.supportDeepLink,
+    this.width,
+    this.height,
+    this.timeout,
+    this.hideSkip,
+    this.callBack,
+    this.isShake = false,
+  }) : super(key: key);
 
   @override
   _SplashAdViewState createState() {
@@ -88,6 +94,7 @@ class _SplashAdViewState extends State<FlutterUnionadSplashAdView> {
             "height": widget.height ?? MediaQuery.of(context).size.height,
             "timeout": widget.timeout,
             "hideSkip": widget.hideSkip,
+            "isShake": widget.isShake,
           },
           onPlatformViewCreated: _registerChannel,
           creationParamsCodec: const StandardMessageCodec(),
@@ -106,6 +113,26 @@ class _SplashAdViewState extends State<FlutterUnionadSplashAdView> {
             "height": widget.height ?? MediaQuery.of(context).size.height,
             "timeout": widget.timeout,
             "hideSkip": widget.hideSkip,
+            "isShake": widget.isShake,
+          },
+          onPlatformViewCreated: _registerChannel,
+          creationParamsCodec: const StandardMessageCodec(),
+        ),
+      );
+    } else if (defaultTargetPlatform == TargetPlatform.ohos) {
+      return Container(
+        width: widget.width ?? MediaQuery.of(context).size.width,
+        height: widget.height ?? MediaQuery.of(context).size.height,
+        child: OhosView(
+          viewType: _viewType,
+          creationParams: {
+            "ohosId": widget.ohosId,
+            "supportDeepLink": widget.supportDeepLink,
+            "width": widget.width ?? MediaQuery.of(context).size.width,
+            "height": widget.height ?? MediaQuery.of(context).size.height,
+            "timeout": widget.timeout,
+            "hideSkip": widget.hideSkip,
+            "isShake": widget.isShake,
           },
           onPlatformViewCreated: _registerChannel,
           creationParamsCodec: const StandardMessageCodec(),
@@ -124,12 +151,11 @@ class _SplashAdViewState extends State<FlutterUnionadSplashAdView> {
 
   //监听原生view传值
   Future<dynamic> _platformCallHandler(MethodCall call) async {
+    //debugPrint("FlutterUnionadSplashAdView=> ${call.method} : ${call.arguments}");
     switch (call.method) {
       //显示广告
       case FlutterUnionadMethod.onShow:
-        if (widget.callBack != null) {
-          widget.callBack?.onShow!();
-        }
+        widget.callBack?.onShow?.call();
         break;
       //广告加载失败
       case FlutterUnionadMethod.onFail:
@@ -138,27 +164,19 @@ class _SplashAdViewState extends State<FlutterUnionadSplashAdView> {
             _isShowAd = false;
           });
         }
-        if (widget.callBack != null) {
-          widget.callBack?.onFail!(call.arguments);
-        }
+        widget.callBack?.onFail?.call(call.arguments);
         break;
       //开屏广告点击
       case FlutterUnionadMethod.onClick:
-        if (widget.callBack != null) {
-          widget.callBack?.onClick!();
-        }
+        widget.callBack?.onClick?.call();
         break;
       //开屏广告跳过
       case FlutterUnionadMethod.onSkip:
-        if (widget.callBack != null) {
-          widget.callBack?.onSkip!();
-        }
+        widget.callBack?.onSkip?.call();
         break;
       //开屏广告倒计时结束
       case FlutterUnionadMethod.onFinish:
-        if (widget.callBack != null) {
-          widget.callBack?.onFinish!();
-        }
+        widget.callBack?.onFinish?.call();
         break;
       //开屏广告加载超时
       case FlutterUnionadMethod.onTimeOut:
@@ -167,9 +185,11 @@ class _SplashAdViewState extends State<FlutterUnionadSplashAdView> {
             _isShowAd = false;
           });
         }
-        if (widget.callBack != null) {
-          widget.callBack?.onTimeOut!();
-        }
+        widget.callBack?.onTimeOut?.call();
+        break;
+      //开屏广告ecpm
+      case FlutterUnionadMethod.onEcpm:
+        widget.callBack?.onEcpm?.call(call.arguments.cast<String, dynamic>());
         break;
     }
   }
